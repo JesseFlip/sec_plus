@@ -1,12 +1,14 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useAuth, useUser, UserButton, SignInButton, SignedIn, SignedOut } from "@clerk/clerk-react";
 import { useTranslation } from "react-i18next";
+import { motion, AnimatePresence } from "framer-motion";
 import { STUDY_DATA, PORTS, ACRONYM_FLASH } from "./data/studyData";
 import "./App.css";
 
 // --- COMPONENTS ---
 
-const ChatBot = ({ completedCount, totalTopics }) => {
+const ChatBot = ({ completedCount, totalTopics, isVisible, setIsVisible }) => {
+  const { t } = useTranslation();
   const [messages, setMessages] = useState([
     { role: "assistant", text: "Welcome! I'm SecBot, your Security+ accountability partner. Ready to tackle some domains today?" }
   ]);
@@ -19,14 +21,6 @@ const ChatBot = ({ completedCount, totalTopics }) => {
   };
 
   useEffect(scrollToBottom, [messages]);
-
-  const handleCheckIn = () => {
-    const status = progressPct >= 80 ? "crushing it" : progressPct >= 50 ? "making good progress" : "just getting started";
-    const msg = `Checking in! I've completed ${completedCount} topics so far. How am I doing?`;
-    setInput(msg);
-    // Auto-send after a brief delay
-    setTimeout(() => handleSend(msg), 100);
-  };
 
   const handleSend = async (overrideInput) => {
     const userMessage = overrideInput || input;
@@ -60,14 +54,36 @@ const ChatBot = ({ completedCount, totalTopics }) => {
     }
   };
 
+  if (!isVisible) {
+    return (
+      <motion.button 
+        className="chat-toggle-btn glass"
+        onClick={() => setIsVisible(true)}
+        initial={{ scale: 0 }}
+        animate={{ scale: 1 }}
+        whileHover={{ scale: 1.1 }}
+      >
+        🛡️
+      </motion.button>
+    );
+  }
+
   return (
-    <div className="chatbot glass">
+    <motion.div 
+      className="chatbot glass"
+      initial={{ y: 100, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      exit={{ y: 100, opacity: 0 }}
+    >
       <div className="chatbot-header">
-        <div className="bot-avatar">🛡️</div>
-        <div>
-          <h3>SecBot</h3>
-          <p>Security+ AI Coach</p>
+        <div className="header-bot-info">
+          <div className="bot-avatar">🛡️</div>
+          <div>
+            <h3>SecBot</h3>
+            <p>Security+ AI Coach</p>
+          </div>
         </div>
+        <button className="minimize-btn" onClick={() => setIsVisible(false)}>—</button>
       </div>
       <div className="chat-messages">
         {messages.map((m, i) => (
@@ -79,7 +95,6 @@ const ChatBot = ({ completedCount, totalTopics }) => {
         <div ref={chatEndRef} />
       </div>
       <div className="chat-footer">
-        <button className="check-in-btn" onClick={handleCheckIn} disabled={loading}>📅 {t('daily_checkin')}</button>
         <div className="chat-input">
           <input 
             type="text" 
@@ -91,7 +106,7 @@ const ChatBot = ({ completedCount, totalTopics }) => {
           <button className="send-btn" onClick={() => handleSend()} disabled={loading}>Send</button>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 };
 
@@ -112,6 +127,7 @@ export default function App() {
   const [flashRevealed, setFlashRevealed] = useState(false);
   const [isTranslating, setIsTranslating] = useState(false);
   const [translatedData, setTranslatedData] = useState(null);
+  const [isChatVisible, setIsChatVisible] = useState(true);
 
   // Sync with Backend if logged in
   useEffect(() => {
@@ -218,6 +234,16 @@ export default function App() {
               </SignedIn>
             </div>
           </div>
+
+          <SignedOut>
+            <motion.div 
+              className="guest-warning glass"
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+            >
+              <span>⚠️ <strong>Guest Mode:</strong> Your progress is saved in this browser, but you must <strong>Sign In</strong> to sync across devices.</span>
+            </motion.div>
+          </SignedOut>
           <div className="stats-grid">
             <div className="stat-card glass">
               <span className="stat-label">{t('total_progress')}</span>
@@ -324,8 +350,15 @@ export default function App() {
         )}
       </main>
 
-      <aside className="sidebar">
-        <ChatBot completedCount={completedCount} totalTopics={totalTopics} />
+      <aside className={`sidebar ${!isChatVisible ? 'minimized' : ''}`}>
+        <AnimatePresence mode="wait">
+          <ChatBot 
+            completedCount={completedCount} 
+            totalTopics={totalTopics} 
+            isVisible={isChatVisible}
+            setIsVisible={setIsChatVisible}
+          />
+        </AnimatePresence>
       </aside>
     </div>
   );
