@@ -21,6 +21,14 @@ if (process.env.MONGODB_URI) {
   console.warn("MONGODB_URI not found. Progress persistence disabled.");
 }
 
+// Check for required keys
+if (!process.env.CLERK_SECRET_KEY) {
+  console.error("CRITICAL: CLERK_SECRET_KEY is missing from environment variables.");
+}
+if (!process.env.GEMINI_API_KEY) {
+  console.warn("GEMINI_API_KEY is missing. Chat and Translation will be disabled.");
+}
+
 const path = require('path');
 
 app.use(cors());
@@ -156,14 +164,26 @@ app.post('/api/translate', async (req, res) => {
 
     const result = await model.generateContent(prompt);
     const response = await result.response;
-    const text = response.text().replace(/```json|```/g, "").trim();
+    let text = response.text().trim();
+    
+    // Remove markdown code blocks if present
+    text = text.replace(/^```json/, "").replace(/```$/, "").trim();
+    
     const translated = JSON.parse(text);
-
     res.json({ translated });
   } catch (err) {
     console.error("Translation error:", err);
-    res.status(500).json({ error: "Translation failed" });
+    res.status(500).json({ error: "Translation failed", details: err.message });
   }
+});
+
+// Global Error Handler
+app.use((err, req, res, next) => {
+  console.error("Global Server Error:", err);
+  res.status(500).json({ 
+    error: "Internal Server Error", 
+    message: err.message 
+  });
 });
 
 // The "catchall" handler: for any request that doesn't
