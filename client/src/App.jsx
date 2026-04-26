@@ -196,101 +196,101 @@ export default function App() {
   const completedCount = Object.values(completed).filter(Boolean).length;
   const progressPct = Math.round((completedCount / totalTopics) * 100);
 
-  const dayData = STUDY_DATA.days.find(d => d.day === activeDay);
+    const dayData = currentStudyData.days.find(d => d.day === activeDay);
 
-  const flashCards = flashMode === "ports" ? PORTS : ACRONYM_FLASH;
+    const flashCards = flashMode === "ports" ? PORTS : ACRONYM_FLASH;
 
-  return (
-    <div className="app-container">
-      <main className="content">
-        <header className="main-header">
-          <div className="header-top">
-            <div className="header-left">
-              <span className="badge">{t('sy0_701_prep')}</span>
-              <h1>{t('app_title')}</h1>
-            </div>
-            <div className="header-actions">
-              <select 
-                className="lang-select glass" 
-                onChange={(e) => i18n.changeLanguage(e.target.value)}
-                value={i18n.language}
-              >
-                <option value="en">English</option>
-                <option value="es">Español</option>
-                <option value="fr">Français</option>
-                <option value="de">Deutsch</option>
-                <option value="ja">日本語</option>
-                <option value="zh">中文</option>
-                <option value="ko">한국어</option>
-                <option value="pt">Português</option>
-              </select>
-              <SignedOut>
-                <SignInButton mode="modal">
-                  <button className="auth-btn glass">Sign In</button>
-                </SignInButton>
-              </SignedOut>
-              <SignedIn>
-                <UserButton afterSignOutUrl="/" />
-              </SignedIn>
-            </div>
-          </div>
-
-          <SignedOut>
-            <motion.div 
-              className="guest-warning glass"
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: "auto", opacity: 1 }}
-            >
-              <span>⚠️ <strong>Guest Mode:</strong> Your progress is saved in this browser, but you must <strong>Sign In</strong> to sync across devices.</span>
-            </motion.div>
-          </SignedOut>
-          <div className="stats-grid">
-            <div className="stat-card glass">
-              <span className="stat-label">{t('total_progress')}</span>
-              <span className="stat-value">{progressPct}%</span>
-              <div className="stat-progress-bar">
-                <div className="bar-fill" style={{ width: `${progressPct}%` }}></div>
+    return (
+      <div className="app-container">
+        <main className="content">
+          <header className="main-header">
+            <div className="header-top">
+              <div className="header-left">
+                <span className="badge">{t('sy0_701_prep')}</span>
+                <h1>{t('app_title')}</h1>
+              </div>
+              <div className="header-actions">
+                <select 
+                  className="lang-select glass" 
+                  onChange={(e) => i18n.changeLanguage(e.target.value)}
+                  value={i18n.language}
+                >
+                  <option value="en">English</option>
+                  <option value="es">Español</option>
+                  <option value="fr">Français</option>
+                  <option value="de">Deutsch</option>
+                  <option value="ja">日本語</option>
+                  <option value="zh">中文</option>
+                  <option value="ko">한국어</option>
+                  <option value="pt">Português</option>
+                </select>
+                <SignedOut>
+                  <SignInButton mode="modal">
+                    <button className="auth-btn glass">Sign In</button>
+                  </SignInButton>
+                </SignedOut>
+                <SignedIn>
+                  <UserButton afterSignOutUrl="/" />
+                </SignedIn>
               </div>
             </div>
-            <div className="stat-card glass">
-              <span className="stat-label">{t('topics_done')}</span>
-              <span className="stat-value">{completedCount}/{totalTopics}</span>
+
+            <SignedOut>
+              <motion.div 
+                className="guest-warning glass"
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+              >
+                <span>⚠️ <strong>Guest Mode:</strong> Your progress is saved in this browser, but you must <strong>Sign In</strong> to sync across devices.</span>
+              </motion.div>
+            </SignedOut>
+            <div className="stats-grid">
+              <div className="stat-card glass">
+                <span className="stat-label">{t('total_progress')}</span>
+                <span className="stat-value">{progressPct}%</span>
+                <div className="stat-progress-bar">
+                  <div className="bar-fill" style={{ width: `${progressPct}%` }}></div>
+                </div>
+              </div>
+              <div className="stat-card glass">
+                <span className="stat-label">{t('topics_done')}</span>
+                <span className="stat-value">{completedCount}/{totalTopics}</span>
+              </div>
+              <div className="stat-card glass">
+                <span className="stat-label">{t('daily_streak')}</span>
+                <span className="stat-value">🔥 1</span>
+              </div>
             </div>
-            <div className="stat-card glass">
-              <span className="stat-label">{t('daily_streak')}</span>
-              <span className="stat-value">🔥 1</span>
+          </header>
+
+          <nav className="view-nav">
+            <button className={view === "map" ? "active" : ""} onClick={() => setView("map")}>{t('study_map')}</button>
+            <button className={view === "flash" ? "active" : ""} onClick={() => setView("flash")}>{t('flashcards')}</button>
+          </nav>
+
+          {isTranslating && (
+            <div className="loading-overlay glass">
+              <div className="spinner"></div>
+              <p>Translating study plan into {i18n.language === 'es' ? 'Español' : i18n.language === 'fr' ? 'Français' : 'selected language'}...</p>
             </div>
-          </div>
-        </header>
+          )}
 
-        <nav className="view-nav">
-          <button className={view === "map" ? "active" : ""} onClick={() => setView("map")}>{t('study_map')}</button>
-          <button className={view === "flash" ? "active" : ""} onClick={() => setView("flash")}>{t('flashcards')}</button>
-        </nav>
+          {view === "map" && (
+            <div className="study-map-view fade-in">
+              <div className="day-selector">
+                {currentStudyData.days.map(d => (
+                  <button 
+                    key={d.day} 
+                    className={activeDay === d.day ? "active" : ""} 
+                    onClick={() => setActiveDay(d.day)}
+                  >
+                    Day {d.day}
+                  </button>
+                ))}
+              </div>
 
-        {isTranslating && (
-          <div className="loading-overlay glass">
-            <div className="spinner"></div>
-            <p>Translating study plan into {i18n.language === 'es' ? 'Español' : i18n.language === 'fr' ? 'Français' : 'selected language'}...</p>
-          </div>
-        )}
-
-        {view === "map" && (
-          <div className="study-map-view fade-in">
-            <div className="day-selector">
-              {STUDY_DATA.days.map(d => (
-                <button 
-                  key={d.day} 
-                  className={activeDay === d.day ? "active" : ""} 
-                  onClick={() => setActiveDay(d.day)}
-                >
-                  Day {d.day}
-                </button>
-              ))}
-            </div>
-
-            <div className="day-content">
-              <h2>{dayData.title}</h2>
+              <div className="day-content">
+                <h2>{dayData.title}</h2>
               <p className="subtitle">{dayData.subtitle}</p>
 
               <div className="blocks-list">
