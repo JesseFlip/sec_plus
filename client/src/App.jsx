@@ -1,4 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
+import { useAuth, useUser, UserButton, SignInButton, SignedIn, SignedOut } from "@clerk/clerk-react";
+import { useTranslation } from "react-i18next";
 import { STUDY_DATA, PORTS, ACRONYM_FLASH } from "./data/studyData";
 import "./App.css";
 
@@ -77,11 +79,11 @@ const ChatBot = ({ completedCount, totalTopics }) => {
         <div ref={chatEndRef} />
       </div>
       <div className="chat-footer">
-        <button className="check-in-btn" onClick={handleCheckIn} disabled={loading}>📅 Daily Check-in</button>
+        <button className="check-in-btn" onClick={handleCheckIn} disabled={loading}>📅 {t('daily_checkin')}</button>
         <div className="chat-input">
           <input 
             type="text" 
-            placeholder="Ask a question..." 
+            placeholder={t('ask_question')} 
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyPress={(e) => e.key === "Enter" && handleSend()}
@@ -94,19 +96,81 @@ const ChatBot = ({ completedCount, totalTopics }) => {
 };
 
 export default function App() {
+  const { t, i18n } = useTranslation();
+  const { isLoaded, userId, getToken } = useAuth();
+  const { user } = useUser();
+
   const [completed, setCompleted] = useState(() => {
     const saved = localStorage.getItem("sec-plus-completed");
     return saved ? JSON.parse(saved) : {};
   });
+
   const [activeDay, setActiveDay] = useState(1);
   const [view, setView] = useState("map");
   const [flashMode, setFlashMode] = useState("ports");
   const [flashIndex, setFlashIndex] = useState(0);
   const [flashRevealed, setFlashRevealed] = useState(false);
+  const [isTranslating, setIsTranslating] = useState(false);
+  const [translatedData, setTranslatedData] = useState(null);
+
+  // Sync with Backend if logged in
+  useEffect(() => {
+    if (isLoaded && userId) {
+      fetch("/api/progress")
+        .then(res => res.json())
+        .then(data => {
+          if (data && Object.keys(data).length > 0) {
+            setCompleted(data);
+          }
+        })
+        .catch(err => console.error("Error fetching progress:", err));
+    }
+  }, [isLoaded, userId]);
 
   useEffect(() => {
     localStorage.setItem("sec-plus-completed", JSON.stringify(completed));
-  }, [completed]);
+    if (isLoaded && userId) {
+      fetch("/api/progress", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ completed })
+      }).catch(err => console.error("Error saving progress:", err));
+    }
+  }, [completed, isLoaded, userId]);
+
+  // Dynamic Translation for Study Data
+  useEffect(() => {
+    const translateContent = async () => {
+      if (i18n.language === 'en') {
+        setTranslatedData(null);
+        return;
+      }
+
+      setIsTranslating(true);
+      try {
+        const response = await fetch("/api/translate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ 
+            targetLanguage: i18n.language,
+            content: STUDY_DATA 
+          })
+        });
+        const data = await response.json();
+        if (data.translated) {
+          setTranslatedData(data.translated);
+        }
+      } catch (err) {
+        console.error("Translation error:", err);
+      } finally {
+        setIsTranslating(false);
+      }
+    };
+
+    translateContent();
+  }, [i18n.language]);
+
+  const currentStudyData = translatedData || STUDY_DATA;
 
   const toggleTopic = (id) => {
     setCompleted(prev => ({ ...prev, [id]: !prev[id] }));
@@ -125,32 +189,65 @@ export default function App() {
       <main className="content">
         <header className="main-header">
           <div className="header-top">
-            <span className="badge">SY0-701 PREP</span>
-            <h1>Security+ Sprint</h1>
+            <div className="header-left">
+              <span className="badge">{t('sy0_701_prep')}</span>
+              <h1>{t('app_title')}</h1>
+            </div>
+            <div className="header-actions">
+              <select 
+                className="lang-select glass" 
+                onChange={(e) => i18n.changeLanguage(e.target.value)}
+                value={i18n.language}
+              >
+                <option value="en">English</option>
+                <option value="es">Español</option>
+                <option value="fr">Français</option>
+                <option value="de">Deutsch</option>
+                <option value="ja">日本語</option>
+                <option value="zh">中文</option>
+                <option value="ko">한국어</option>
+                <option value="pt">Português</option>
+              </select>
+              <SignedOut>
+                <SignInButton mode="modal">
+                  <button className="auth-btn glass">Sign In</button>
+                </SignInButton>
+              </SignedOut>
+              <SignedIn>
+                <UserButton afterSignOutUrl="/" />
+              </SignedIn>
+            </div>
           </div>
           <div className="stats-grid">
             <div className="stat-card glass">
-              <span className="stat-label">Total Progress</span>
+              <span className="stat-label">{t('total_progress')}</span>
               <span className="stat-value">{progressPct}%</span>
               <div className="stat-progress-bar">
                 <div className="bar-fill" style={{ width: `${progressPct}%` }}></div>
               </div>
             </div>
             <div className="stat-card glass">
-              <span className="stat-label">Topics Done</span>
+              <span className="stat-label">{t('topics_done')}</span>
               <span className="stat-value">{completedCount}/{totalTopics}</span>
             </div>
             <div className="stat-card glass">
-              <span className="stat-label">Daily Streak</span>
+              <span className="stat-label">{t('daily_streak')}</span>
               <span className="stat-value">🔥 1</span>
             </div>
           </div>
         </header>
 
         <nav className="view-nav">
-          <button className={view === "map" ? "active" : ""} onClick={() => setView("map")}>Study Map</button>
-          <button className={view === "flash" ? "active" : ""} onClick={() => setView("flash")}>Flashcards</button>
+          <button className={view === "map" ? "active" : ""} onClick={() => setView("map")}>{t('study_map')}</button>
+          <button className={view === "flash" ? "active" : ""} onClick={() => setView("flash")}>{t('flashcards')}</button>
         </nav>
+
+        {isTranslating && (
+          <div className="loading-overlay glass">
+            <div className="spinner"></div>
+            <p>Translating study plan into {i18n.language === 'es' ? 'Español' : i18n.language === 'fr' ? 'Français' : 'selected language'}...</p>
+          </div>
+        )}
 
         {view === "map" && (
           <div className="study-map-view fade-in">
@@ -219,8 +316,8 @@ export default function App() {
                 </div>
               </div>
               <div className="flash-nav">
-                <button onClick={() => { setFlashIndex(Math.max(0, flashIndex - 1)); setFlashRevealed(false); }}>Prev</button>
-                <button onClick={() => { setFlashIndex((flashIndex + 1) % flashCards.length); setFlashRevealed(false); }}>Next</button>
+                <button onClick={() => { setFlashIndex(Math.max(0, flashIndex - 1)); setFlashRevealed(false); }}>{t('prev')}</button>
+                <button onClick={() => { setFlashIndex((flashIndex + 1) % flashCards.length); setFlashRevealed(false); }}>{t('next')}</button>
               </div>
             </div>
           </div>
