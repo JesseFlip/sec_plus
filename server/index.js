@@ -3,7 +3,7 @@ const cors = require('cors');
 const dotenv = require('dotenv');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 const mongoose = require('mongoose');
-const { clerkMiddleware, getAuth } = require('@clerk/clerk-sdk-node');
+const { clerkMiddleware, getAuth } = require('@clerk/express');
 const { STUDY_DATA, PORTS, ACRONYM_FLASH } = require('./data/studyData');
 const UserProgress = require('./models/UserProgress');
 
