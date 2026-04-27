@@ -2671,21 +2671,32 @@ function App(){
   const [chatOpen, setChatOpen] = useState(false);
   const [chatMessages, setChatMessages] = useState([{role: "bot", text: "Hello! I am your SY0-701 AI Tutor. How can I help you today?"}]);
   const [chatInput, setChatInput] = useState("");
+  const [isChatLoading, setIsChatLoading] = useState(false);
 
-  const handleChatSubmit = (e) => {
+  const handleChatSubmit = async (e) => {
     e.preventDefault();
-    if (!chatInput.trim()) return;
+    if (!chatInput.trim() || isChatLoading) return;
 
-    setChatMessages(prev => [...prev, {role: "user", text: chatInput}]);
-
-    // Mock API response
-    const botResponse = `[Mock API Response in ${T[lang]?._name || "English"}] - As an AI Tutor restricted to CompTIA Security+ SY0-701 objectives, I recommend reviewing Domain 1 and 2 to better understand this concept. Remember, CIA triad is essential!`;
-
-    setTimeout(() => {
-      setChatMessages(prev => [...prev, {role: "bot", text: botResponse}]);
-    }, 600);
-
+    const userMsg = chatInput;
+    setChatMessages(prev => [...prev, {role: "user", text: userMsg}]);
     setChatInput("");
+    setIsChatLoading(true);
+
+    try {
+      const systemPrompt = `You are an expert CompTIA Security+ SY0-701 AI Tutor. Restrict your answers to the scope of the SY0-701 exam objectives (General Security Concepts, Threats/Vulnerabilities, Architecture, Operations, Governance/Risk). Do not answer questions outside of cybersecurity or this exam. Respond primarily in the language: ${T[lang]?._name || "English"}. User question: `;
+      const fullPrompt = encodeURIComponent(systemPrompt + userMsg);
+
+      const res = await fetch("https://text.pollinations.ai/prompt/" + fullPrompt);
+      if (!res.ok) throw new Error("API responded with an error");
+      const botResponse = await res.text();
+
+      setChatMessages(prev => [...prev, {role: "bot", text: botResponse}]);
+    } catch (err) {
+      console.error("Chat API Error:", err);
+      setChatMessages(prev => [...prev, {role: "bot", text: "Sorry, I am having trouble connecting to my knowledge base right now. Please try again later."}]);
+    } finally {
+      setIsChatLoading(false);
+    }
   };
 
   const [showResetModal, setShowResetModal] = useState(false);
@@ -2749,7 +2760,11 @@ function App(){
             background: msg.role === "user" ? "var(--accent)" : "var(--surface2)",
             color: msg.role === "user" ? "#fff" : "var(--text)",
             padding:"8px 12px",borderRadius:8,maxWidth:"85%",fontSize:13,lineHeight:1.4
-          }}, msg.text))
+          }}, msg.text)),
+          isChatLoading && React.createElement("div", {style:{
+            alignSelf: "flex-start", background: "var(--surface2)", color: "var(--text)",
+            padding:"8px 12px",borderRadius:8,maxWidth:"85%",fontSize:13,fontStyle:"italic"
+          }}, "Thinking...")
         ),
         // Chat input
         React.createElement("form", {onSubmit:handleChatSubmit, style:{display:"flex",padding:8,borderTop:"1px solid var(--border)",background:"var(--surface)"}},
