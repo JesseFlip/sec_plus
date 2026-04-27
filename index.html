@@ -2663,6 +2663,11 @@ function App(){
   const dayBlocks=BLOCKS.filter(b=>b.day===activeDay);
   const dayMeta=DAY_META.find(d=>d.day===activeDay);
 
+  const [showBanner, setShowBanner] = useState(() => localStorage.getItem("sp-banner-dismissed") !== "true");
+  useEffect(() => {
+    if (!showBanner) localStorage.setItem("sp-banner-dismissed", "true");
+  }, [showBanner]);
+
   const [chatOpen, setChatOpen] = useState(false);
   const [chatMessages, setChatMessages] = useState([{role: "bot", text: "Hello! I am your SY0-701 AI Tutor. How can I help you today?"}]);
   const [chatInput, setChatInput] = useState("");
@@ -2700,6 +2705,23 @@ function App(){
   };
 
   return React.createElement("div",{className:"main-wrap"},
+    showBanner && React.createElement("div", {style:{
+      background: "var(--accent)", color: "#fff", padding: "8px 30px 8px 10px",
+      position: "relative", overflow: "hidden", display: "flex", alignItems: "center"
+    }},
+      React.createElement("div", {style:{
+        whiteSpace: "nowrap", animation: "marquee 15s linear infinite", fontSize: "13px", fontWeight: "600"
+      }}, "🚀 New updates! Expanded regional language support, interactive flashcard tracking, resource hyperlinks, offline PWA access, and a new AI tutor!"),
+      React.createElement("button", {
+        onClick: () => setShowBanner(false),
+        style: {
+          position: "absolute", right: "10px", background: "rgba(0,0,0,0.2)", border: "none",
+          color: "#fff", borderRadius: "50%", width: "20px", height: "20px", cursor: "pointer",
+          display: "flex", alignItems: "center", justifyContent: "center", fontSize: "14px"
+        }
+      }, "×")
+    ),
+    React.createElement("style", null, "@keyframes marquee { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }"),
     showResetModal && React.createElement("div",{style:{position:"fixed",inset:0,background:"rgba(0,0,0,0.8)",zIndex:9999,display:"flex",alignItems:"center",justifyContent:"center"}},
       React.createElement("div",{style:{background:"var(--surface)",padding:24,borderRadius:12,width:300,border:"1px solid var(--border)",boxShadow:"0 8px 32px rgba(0,0,0,0.5)",textAlign:"center"}},
         React.createElement("h3",{style:{marginBottom:16,color:"var(--bright)"}},"Reset Options"),
