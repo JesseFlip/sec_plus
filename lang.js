@@ -2,6 +2,7 @@ const T = {
   "en": {
     "_name": "English",
     "_flag": "🇺🇸",
+    "_code": "us",
     "sprint": "3-DAY SPRINT",
     "examCode": "SY0-701",
     "title": "Security+ Study Map",
@@ -184,6 +185,7 @@ const T = {
   "es": {
     "_name": "Español",
     "_flag": "🇪🇸",
+    "_code": "es",
     "sprint": "SPRINT DE 3 DÍAS",
     "examCode": "SY0-701",
     "title": "Mapa de Estudio Security+",
@@ -366,6 +368,7 @@ const T = {
   "fr": {
     "_name": "Français",
     "_flag": "🇫🇷",
+    "_code": "fr",
     "sprint": "SPRINT DE 3 JOURS",
     "examCode": "SY0-701",
     "title": "Carte d'Étude Security+",
@@ -548,6 +551,7 @@ const T = {
   "pt": {
     "_name": "Português",
     "_flag": "🇧🇷",
+    "_code": "br",
     "sprint": "SPRINT DE 3 DIAS",
     "examCode": "SY0-701",
     "title": "Mapa de Estudo Security+",
@@ -730,6 +734,7 @@ const T = {
   "hi": {
     "_name": "हिन्दी (Hindi)",
     "_flag": "🇮🇳",
+    "_code": "in",
     "sprint": "3-दिवसीय स्प्रिंट",
     "examCode": "SY0-701",
     "title": "सुरक्षा+अध्ययन मानचित्र",
@@ -912,6 +917,7 @@ const T = {
   "bn": {
     "_name": "বাংলা (Bengali)",
     "_flag": "🇧🇩",
+    "_code": "bd",
     "sprint": "3-দিনের স্প্রিন্ট",
     "examCode": "SY0-701",
     "title": "নিরাপত্তা + অধ্যয়ন মানচিত্র",
@@ -1094,6 +1100,7 @@ const T = {
   "te": {
     "_name": "తెలుగు (Telugu)",
     "_flag": "🇮🇳",
+    "_code": "in",
     "sprint": "3-రోజుల స్ప్రింట్",
     "examCode": "SY0-701",
     "title": "సెక్యూరిటీ+ స్టడీ మ్యాప్",
@@ -1276,6 +1283,7 @@ const T = {
   "mr": {
     "_name": "मराठी (Marathi)",
     "_flag": "🇮🇳",
+    "_code": "in",
     "sprint": "3-दिवस स्प्रिंट",
     "examCode": "SY0-701",
     "title": "सुरक्षा + अभ्यास नकाशा",
@@ -1458,6 +1466,7 @@ const T = {
   "ta": {
     "_name": "தமிழ் (Tamil)",
     "_flag": "🇮🇳",
+    "_code": "in",
     "sprint": "3-நாள் ஸ்பிரிண்ட்",
     "examCode": "SY0-701",
     "title": "பாதுகாப்பு+ ஆய்வு வரைபடம்",
@@ -1640,6 +1649,7 @@ const T = {
   "ur": {
     "_name": "اردو (Urdu)",
     "_flag": "🇵🇰",
+    "_code": "pk",
     "sprint": "3 دن کی سپرنٹ",
     "examCode": "SY0-701",
     "title": "سیکیورٹی + مطالعہ کا نقشہ",
@@ -1822,6 +1832,7 @@ const T = {
   "sw": {
     "_name": "Swahili",
     "_flag": "🇰🇪",
+    "_code": "ke",
     "sprint": "SPRINT YA SIKU 3",
     "examCode": "SY0-701",
     "title": "Usalama+ Ramani ya Utafiti",
@@ -2004,6 +2015,7 @@ const T = {
   "am": {
     "_name": "Amharic",
     "_flag": "🇪🇹",
+    "_code": "et",
     "sprint": "3-ቀን SPRINT",
     "examCode": "SY0-701",
     "title": "የደህንነት+ የጥናት ካርታ",
@@ -2186,6 +2198,7 @@ const T = {
   "yo": {
     "_name": "Yoruba",
     "_flag": "🇳🇬",
+    "_code": "ng",
     "sprint": "3-DAY SPRINT",
     "examCode": "SY0-701",
     "title": "Aabo + Ikẹkọ Map",
@@ -2368,6 +2381,7 @@ const T = {
   "zu": {
     "_name": "Zulu",
     "_flag": "🇿🇦",
+    "_code": "za",
     "sprint": "I-SPRINT YEZINSUKU EZINGU-3",
     "examCode": "SY0-701",
     "title": "Imephu Yokuphepha+ Yokufunda",
@@ -2550,6 +2564,7 @@ const T = {
   "ig": {
     "_name": "Igbo",
     "_flag": "🇳🇬",
+    "_code": "ng",
     "sprint": "3-Ụbọchị SPRINT",
     "examCode": "SY0-701",
     "title": "Nchekwa + Map Ọmụmụ",
@@ -2732,6 +2747,7 @@ const T = {
   "de": {
     "_name": "Deutsch",
     "_flag": "🇩🇪",
+    "_code": "de",
     "sprint": "3-TAGE-SPRINT",
     "examCode": "SY0-701",
     "title": "Security+ Studienplan",
