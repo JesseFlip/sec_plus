@@ -250,34 +250,42 @@ function App(){
   const dayBlocks=BLOCKS.filter(b=>b.day===activeDay);
   const dayMeta=DAY_META.find(d=>d.day===activeDay);
 
+  const [showBanner, setShowBanner] = useState(() => localStorage.getItem("sp-banner-dismissed") !== "true");
+  useEffect(() => {
+    if (!showBanner) localStorage.setItem("sp-banner-dismissed", "true");
+  }, [showBanner]);
+
   const [chatOpen, setChatOpen] = useState(false);
   const [chatMessages, setChatMessages] = useState([{role: "bot", text: "Hello! I am your SY0-701 AI Tutor. How can I help you today?"}]);
   const [chatInput, setChatInput] = useState("");
+  const [isChatLoading, setIsChatLoading] = useState(false);
 
   const handleChatSubmit = async (e) => {
     e.preventDefault();
-    if (!chatInput.trim()) return;
+    if (!chatInput.trim() || isChatLoading) return;
+
     const userInput = chatInput.trim();
-    setChatMessages(prev => [...prev, {role: 'user', text: userInput}]);
-    setChatInput('');
-    setChatMessages(prev => [...prev, {role: 'bot', text: '...'}]);
+    setChatMessages(prev => [...prev, {role: "user", text: userInput}]);
+    setChatInput("");
+    setIsChatLoading(true);
+
     try {
-      const prompt = 'You are an AI Tutor strictly limited to CompTIA Security+ SY0-701 objectives. Answer concisely in ' + (T[lang]?._name || 'English') + '. User says: ' + userInput;
-      const res = await fetch('https://text.pollinations.ai/' + encodeURIComponent(prompt));
-      if (!res.ok) throw new Error('API Error');
-      let text = await res.text();
-      text = text.replace(/⚠️ \*\*IMPORTANT NOTICE\*\* ⚠️[\\s\\S]*?normally\.\\s*/, '');
-      setChatMessages(prev => {
-        const newMsgs = [...prev];
-        newMsgs[newMsgs.length - 1] = {role: 'bot', text: text.trim()};
-        return newMsgs;
-      });
+      const systemPrompt = `You are an expert CompTIA Security+ SY0-701 AI Tutor. Restrict your answers to the scope of the SY0-701 exam objectives (General Security Concepts, Threats/Vulnerabilities, Architecture, Operations, Governance/Risk). Do not answer questions outside of cybersecurity or this exam. Respond primarily in the language: ${T[lang]?._name || "English"}. User question: `;
+      const fullPrompt = encodeURIComponent(systemPrompt + userInput);
+
+      const res = await fetch("https://text.pollinations.ai/prompt/" + fullPrompt);
+      if (!res.ok) throw new Error("API responded with an error");
+      let botResponse = await res.text();
+      
+      // Strip Pollinations banner if present
+      botResponse = botResponse.replace(/⚠️ \*\*IMPORTANT NOTICE\*\* ⚠️[\s\S]*?normally\.\s*/, "");
+
+      setChatMessages(prev => [...prev, {role: "bot", text: botResponse.trim()}]);
     } catch (err) {
-      setChatMessages(prev => {
-        const newMsgs = [...prev];
-        newMsgs[newMsgs.length - 1] = {role: 'bot', text: 'Error connecting to AI Tutor. Please try again later.'};
-        return newMsgs;
-      });
+      console.error("Chat API Error:", err);
+      setChatMessages(prev => [...prev, {role: "bot", text: "Sorry, I am having trouble connecting to my knowledge base right now. Please try again later."}]);
+    } finally {
+      setIsChatLoading(false);
     }
   };
 
@@ -298,14 +306,26 @@ function App(){
   };
 
   return React.createElement("div",{className:"main-wrap"},
-
-    showBanner && React.createElement('div', {style:{background:'var(--accent)',color:'#fff',padding:'8px 16px',display:'flex',justifyContent:'space-between',alignItems:'center'}},
-      React.createElement('div', {style:{overflow:'hidden',whiteSpace:'nowrap',flex:1}},
-        React.createElement('div', {style:{display:'inline-block',animation:'scrollBanner 15s linear infinite'}}, 'Welcome! We\'ve improved readability and added more language options for our global classmates.')
-      ),
-      React.createElement('button', {onClick:()=>{setShowBanner(false);localStorage.setItem('sp-banner-closed','true')},style:{background:'transparent',border:'none',color:'#fff',marginLeft:16,cursor:'pointer',fontSize:16,fontWeight:'bold'}}, '✕')
+    showBanner && React.createElement("div", {style:{
+      background: "var(--accent)", color: "#fff", padding: "8px 30px 8px 10px",
+      position: "relative", overflow: "hidden", display: "flex", alignItems: "center"
+    }},
+      React.createElement("div", {style:{
+        whiteSpace: "nowrap", animation: "marquee 15s linear infinite", fontSize: "13px", fontWeight: "600"
+      }}, "🚀 New updates! Expanded regional language support, interactive flashcard tracking, resource hyperlinks, offline PWA access, and a new AI tutor!"),
+      React.createElement("button", {
+        onClick: () => {
+          setShowBanner(false);
+          localStorage.setItem("sp-banner-dismissed", "true");
+        },
+        style: {
+          position: "absolute", right: "10px", background: "rgba(0,0,0,0.2)", border: "none",
+          color: "#fff", borderRadius: "50%", width: "20px", height: "20px", cursor: "pointer",
+          display: "flex", alignItems: "center", justifyContent: "center", fontSize: "14px"
+        }
+      }, "×")
     ),
-
+    React.createElement("style", null, "@keyframes marquee { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }"),
     showResetModal && React.createElement("div",{style:{position:"fixed",inset:0,background:"rgba(0,0,0,0.8)",zIndex:9999,display:"flex",alignItems:"center",justifyContent:"center"}},
       React.createElement("div",{style:{background:"var(--surface)",padding:24,borderRadius:12,width:300,border:"1px solid var(--border)",boxShadow:"0 8px 32px rgba(0,0,0,0.5)",textAlign:"center"}},
         React.createElement("h3",{style:{marginBottom:16,color:"var(--bright)"}},"Reset Options"),
@@ -351,7 +371,11 @@ function App(){
             background: msg.role === "user" ? "var(--accent)" : "var(--surface2)",
             color: msg.role === "user" ? "#fff" : "var(--text)",
             padding:"8px 12px",borderRadius:8,maxWidth:"85%",fontSize:13,lineHeight:1.4
-          }}, msg.text))
+          }}, msg.text)),
+          isChatLoading && React.createElement("div", {style:{
+            alignSelf: "flex-start", background: "var(--surface2)", color: "var(--text)",
+            padding:"8px 12px",borderRadius:8,maxWidth:"85%",fontSize:13,fontStyle:"italic"
+          }}, "Thinking...")
         ),
         // Chat input
         React.createElement("form", {onSubmit:handleChatSubmit, style:{display:"flex",padding:8,borderTop:"1px solid var(--border)",background:"var(--surface)"}},
