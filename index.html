@@ -64,7 +64,13 @@ body::before{content:'';position:fixed;inset:0;background:url("data:image/svg+xm
 @keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
 .progress-fill.complete{background:linear-gradient(90deg,#3dc97a,#4ade80,#3dc97a) !important;background-size:200% 100%;animation:shimmer 2s ease infinite}
 
-\n/* Scrolling Banner */\n@keyframes scrollBanner {\n  0% { transform: translateX(100%); }\n  100% { transform: translateX(-100%); }\n}\n/* Responsive */
+
+/* Scrolling Banner */
+@keyframes scrollBanner {
+  0% { transform: translateX(100%); }
+  100% { transform: translateX(-100%); }
+}
+/* Responsive */
 @media(min-width:640px){.main-wrap{max-width:680px;margin:0 auto}}
 @media(min-width:900px){.main-wrap{max-width:820px}}
 </style>
@@ -177,7 +183,9 @@ function App(){
   const [flashIdx,setFlashIdx]=useState(0);
   const [revealed,setRevealed]=useState(false);
   const [langOpen,setLangOpen]=useState(false);
-  const [langSearch,setLangSearch]=useState("");\n  const [showBanner, setShowBanner] = useState(() => localStorage.getItem('sp-banner-closed') !== 'true');\n
+  const [langSearch,setLangSearch]=useState("");
+  const [showBanner, setShowBanner] = useState(() => localStorage.getItem('sp-banner-closed') !== 'true');
+
 
   const t=T[lang]||T.en;
 
@@ -246,7 +254,34 @@ function App(){
   const [chatMessages, setChatMessages] = useState([{role: "bot", text: "Hello! I am your SY0-701 AI Tutor. How can I help you today?"}]);
   const [chatInput, setChatInput] = useState("");
 
-  const handleChatSubmit = async (e) => {\n    e.preventDefault();\n    if (!chatInput.trim()) return;\n    const userInput = chatInput.trim();\n    setChatMessages(prev => [...prev, {role: 'user', text: userInput}]);\n    setChatInput('');\n    setChatMessages(prev => [...prev, {role: 'bot', text: '...'}]);\n    try {\n      const prompt = 'You are an AI Tutor strictly limited to CompTIA Security+ SY0-701 objectives. Answer concisely in ' + (T[lang]?._name || 'English') + '. User says: ' + userInput;\n      const res = await fetch('https://text.pollinations.ai/' + encodeURIComponent(prompt));\n      if (!res.ok) throw new Error('API Error');\n      let text = await res.text();\n      text = text.replace(/⚠️ \*\*IMPORTANT NOTICE\*\* ⚠️[\\s\\S]*?normally\.\\s*/, '');\n      setChatMessages(prev => {\n        const newMsgs = [...prev];\n        newMsgs[newMsgs.length - 1] = {role: 'bot', text: text.trim()};\n        return newMsgs;\n      });\n    } catch (err) {\n      setChatMessages(prev => {\n        const newMsgs = [...prev];\n        newMsgs[newMsgs.length - 1] = {role: 'bot', text: 'Error connecting to AI Tutor. Please try again later.'};\n        return newMsgs;\n      });\n    }\n  };\n\n  const [showResetModal, setShowResetModal] = useState(false);
+  const handleChatSubmit = async (e) => {
+    e.preventDefault();
+    if (!chatInput.trim()) return;
+    const userInput = chatInput.trim();
+    setChatMessages(prev => [...prev, {role: 'user', text: userInput}]);
+    setChatInput('');
+    setChatMessages(prev => [...prev, {role: 'bot', text: '...'}]);
+    try {
+      const prompt = 'You are an AI Tutor strictly limited to CompTIA Security+ SY0-701 objectives. Answer concisely in ' + (T[lang]?._name || 'English') + '. User says: ' + userInput;
+      const res = await fetch('https://text.pollinations.ai/' + encodeURIComponent(prompt));
+      if (!res.ok) throw new Error('API Error');
+      let text = await res.text();
+      text = text.replace(/⚠️ \*\*IMPORTANT NOTICE\*\* ⚠️[\\s\\S]*?normally\.\\s*/, '');
+      setChatMessages(prev => {
+        const newMsgs = [...prev];
+        newMsgs[newMsgs.length - 1] = {role: 'bot', text: text.trim()};
+        return newMsgs;
+      });
+    } catch (err) {
+      setChatMessages(prev => {
+        const newMsgs = [...prev];
+        newMsgs[newMsgs.length - 1] = {role: 'bot', text: 'Error connecting to AI Tutor. Please try again later.'};
+        return newMsgs;
+      });
+    }
+  };
+
+  const [showResetModal, setShowResetModal] = useState(false);
 
   const resetBank = () => {
     setAnsweredCards({});
@@ -262,7 +297,15 @@ function App(){
     }
   };
 
-  return React.createElement("div",{className:"main-wrap"},\n\n    showBanner && React.createElement('div', {style:{background:'var(--accent)',color:'#fff',padding:'8px 16px',display:'flex',justifyContent:'space-between',alignItems:'center'}},\n      React.createElement('div', {style:{overflow:'hidden',whiteSpace:'nowrap',flex:1}},\n        React.createElement('div', {style:{display:'inline-block',animation:'scrollBanner 15s linear infinite'}}, 'Welcome! We\'ve improved readability and added more language options for our global classmates.')\n      ),\n      React.createElement('button', {onClick:()=>{setShowBanner(false);localStorage.setItem('sp-banner-closed','true')},style:{background:'transparent',border:'none',color:'#fff',marginLeft:16,cursor:'pointer',fontSize:16,fontWeight:'bold'}}, '✕')\n    ),\n
+  return React.createElement("div",{className:"main-wrap"},
+
+    showBanner && React.createElement('div', {style:{background:'var(--accent)',color:'#fff',padding:'8px 16px',display:'flex',justifyContent:'space-between',alignItems:'center'}},
+      React.createElement('div', {style:{overflow:'hidden',whiteSpace:'nowrap',flex:1}},
+        React.createElement('div', {style:{display:'inline-block',animation:'scrollBanner 15s linear infinite'}}, 'Welcome! We\'ve improved readability and added more language options for our global classmates.')
+      ),
+      React.createElement('button', {onClick:()=>{setShowBanner(false);localStorage.setItem('sp-banner-closed','true')},style:{background:'transparent',border:'none',color:'#fff',marginLeft:16,cursor:'pointer',fontSize:16,fontWeight:'bold'}}, '✕')
+    ),
+
     showResetModal && React.createElement("div",{style:{position:"fixed",inset:0,background:"rgba(0,0,0,0.8)",zIndex:9999,display:"flex",alignItems:"center",justifyContent:"center"}},
       React.createElement("div",{style:{background:"var(--surface)",padding:24,borderRadius:12,width:300,border:"1px solid var(--border)",boxShadow:"0 8px 32px rgba(0,0,0,0.5)",textAlign:"center"}},
         React.createElement("h3",{style:{marginBottom:16,color:"var(--bright)"}},"Reset Options"),
@@ -271,7 +314,25 @@ function App(){
         React.createElement("button",{onClick:()=>setShowResetModal(false),style:{width:"100%",padding:"10px",background:"transparent",border:"none",color:"var(--dim)",cursor:"pointer"}},"Cancel")
       )
     ),
-    \n    // FEEDBACK BUTTON (floating bottom left)\n    React.createElement('a', {\n      href: 'https://github.com/JesseFlip/sec_plus/issues/new',\n      target: '_blank',\n      rel: 'noopener noreferrer',\n      style: {\n        position: 'fixed', bottom: 20, left: 20, zIndex: 100,\n        background: 'var(--surface)', color: 'var(--text)', border: '1px solid var(--border)',\n        padding: '8px 16px', borderRadius: 20, textDecoration: 'none', fontSize: 13,\n        display: 'flex', alignItems: 'center', gap: 6, boxShadow: '0 4px 12px rgba(0,0,0,0.3)',\n        transition: 'all 0.2s'\n      },\n      onMouseEnter: (e) => e.currentTarget.style.background = 'var(--surface2)',\n      onMouseLeave: (e) => e.currentTarget.style.background = 'var(--surface)'\n    }, '💡 Feedback / Suggest Change'),\n\n\n    // FEEDBACK BUTTON (floating bottom left)\n    React.createElement('a', {\n      href: 'https://github.com/JesseFlip/sec_plus/issues/new',\n      target: '_blank',\n      rel: 'noopener noreferrer',\n      style: {\n        position: 'fixed', bottom: 20, left: 20, zIndex: 100,\n        background: 'var(--surface)', color: 'var(--text)', border: '1px solid var(--border)',\n        padding: '8px 16px', borderRadius: 20, textDecoration: 'none', fontSize: 13,\n        display: 'flex', alignItems: 'center', gap: 6, boxShadow: '0 4px 12px rgba(0,0,0,0.3)',\n        transition: 'all 0.2s'\n      },\n      onMouseEnter: (e) => e.currentTarget.style.background = 'var(--surface2)',\n      onMouseLeave: (e) => e.currentTarget.style.background = 'var(--surface)'\n    }, '💡 Feedback / Suggest Change'),\n\n// AI TUTOR (floating)
+    
+    // FEEDBACK BUTTON (floating bottom left)
+    React.createElement('a', {
+      href: 'https://github.com/JesseFlip/sec_plus/issues/new',
+      target: '_blank',
+      rel: 'noopener noreferrer',
+      style: {
+        position: 'fixed', bottom: 20, left: 20, zIndex: 100,
+        background: 'var(--surface)', color: 'var(--text)', border: '1px solid var(--border)',
+        padding: '8px 16px', borderRadius: 20, textDecoration: 'none', fontSize: 13,
+        display: 'flex', alignItems: 'center', gap: 6, boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+        transition: 'all 0.2s'
+      },
+      onMouseEnter: (e) => e.currentTarget.style.background = 'var(--surface2)',
+      onMouseLeave: (e) => e.currentTarget.style.background = 'var(--surface)'
+    }, '💡 Feedback / Suggest Change'),
+
+    // AI TUTOR (floating)
+
     React.createElement("div", {style:{position:"fixed",bottom:20,right:20,zIndex:100}},
       chatOpen && React.createElement("div", {style:{
         position:"absolute",bottom:"100%",right:0,marginBottom:10,background:"var(--surface)",
