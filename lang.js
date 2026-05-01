@@ -180,6 +180,12 @@ const T = {
     "midday": "MIDDAY",
     "afternoon": "AFTERNOON",
     "langLabel": "Language",
+    "strategy": "Strategy",
+    "tactics": "Tactics",
+    "conceptMatrix": "Concept Matrix",
+    "resources": "Resources",
+    "blueprint": "Blueprint",
+    "highYield": "High-Yield",
     "attribution": "Study content structured from Dion Training SY0-701 Study Notes and the Get Certified Get Ahead SY0-701 Study Guide."
   },
   "es": {
@@ -363,6 +369,12 @@ const T = {
     "midday": "MEDIODÍA",
     "afternoon": "TARDE",
     "langLabel": "Idioma",
+    "strategy": "Estrategia",
+    "tactics": "Tácticas",
+    "conceptMatrix": "Matriz de Conceptos",
+    "resources": "Recursos",
+    "blueprint": "Guía",
+    "highYield": "Alto Rendimiento",
     "attribution": "Contenido de estudio estructurado a partir de las Notas de Estudio SY0-701 de Dion Training y la Guía de Estudio Get Certified Get Ahead SY0-701."
   },
   "fr": {
@@ -546,6 +558,12 @@ const T = {
     "midday": "MI-JOURNÉE",
     "afternoon": "APRÈS-MIDI",
     "langLabel": "Langue",
+    "strategy": "Stratégie",
+    "tactics": "Tactiques",
+    "conceptMatrix": "Matrice de Concepts",
+    "resources": "Ressources",
+    "blueprint": "Guide",
+    "highYield": "Haut Rendement",
     "attribution": "Contenu d'étude structuré à partir des Notes d'Étude SY0-701 de Dion Training et du Guide d'Étude Get Certified Get Ahead SY0-701."
   },
   "pt": {
@@ -729,6 +747,12 @@ const T = {
     "midday": "MEIO-DIA",
     "afternoon": "TARDE",
     "langLabel": "Idioma",
+    "strategy": "Estratégia",
+    "tactics": "Táticas",
+    "conceptMatrix": "Matriz de Conceitos",
+    "resources": "Recursos",
+    "blueprint": "Guia",
+    "highYield": "Alto Rendimento",
     "attribution": "Conteúdo de estudo estruturado a partir das Notas de Estudo SY0-701 da Dion Training e do Guia de Estudo Get Certified Get Ahead SY0-701."
   },
   "hi": {

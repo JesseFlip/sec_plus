@@ -78,6 +78,7 @@ body::before{content:'';position:fixed;inset:0;background:url("data:image/svg+xm
 <body>
 <div id="root"></div>
 <script src="lang.js"></script>
+<script src="strategy_data.js"></script>
 <script type="text/babel">
 const {useState,useEffect,useCallback,useMemo} = React;
 
@@ -170,6 +171,103 @@ function TopicRow({tid, query, completed, toggle, dc, blockStars, t}) {
   );
 }
 
+function StrategyView({t, subTab, setSubTab}) {
+  const data = window.STRATEGY_DATA;
+  
+  return React.createElement("div", {style:{padding:20}},
+    React.createElement("div", {style:{display:"flex", gap:8, marginBottom:20, overflowX:"auto", paddingBottom:8, scrollbarWidth:"none"}},
+      ["tactics", "matrix", "resources", "blueprint"].map(st => 
+        React.createElement("button", {
+          key:st,
+          onClick:() => setSubTab(st),
+          style:{
+            padding:"6px 12px", borderRadius:20, border:"1px solid var(--border)",
+            background:subTab === st ? "var(--accent)" : "var(--surface2)",
+            color:subTab === st ? "#fff" : "var(--dim)",
+            fontSize:12, fontWeight:600, whiteSpace:"nowrap", cursor:"pointer",
+            transition: "all 0.2s"
+          }
+        }, t[st] || st.charAt(0).toUpperCase() + st.slice(1))
+      )
+    ),
+
+    subTab === "tactics" && React.createElement("div", {className:"block-card", style:{animation:"fadeSlideIn 0.3s ease both"}},
+      React.createElement("h3", {style:{fontSize:16, color:"var(--bright)", marginBottom:12}}, "Strategic Success Tactics"),
+      data.TACTICS.map((tac, i) => React.createElement("div", {key:i, style:{background:"var(--surface2)", padding:16, borderRadius:8, marginBottom:12, borderLeft:"3px solid var(--blue)"}},
+        React.createElement("h4", {style:{color:"var(--accent)", fontSize:14, marginBottom:4}}, tac.title),
+        React.createElement("p", {style:{fontSize:13, color:"var(--text)", lineHeight:1.4}}, tac.desc)
+      )),
+      React.createElement("h3", {style:{fontSize:16, color:"var(--bright)", marginBottom:12, marginTop:24}}, "Top 10 Most-Missed Clusters"),
+      React.createElement("div", {style:{overflowX:"auto", background:"var(--surface2)", borderRadius:8, padding:8}},
+        React.createElement("table", {style:{width:"100%", borderCollapse:"collapse", fontSize:12}},
+          React.createElement("thead", null, React.createElement("tr", {style:{textAlign:"left", borderBottom:"1px solid var(--border)"}},
+            React.createElement("th", {style:{padding:8}}, "Rank"),
+            React.createElement("th", {style:{padding:8}}, "Group"),
+            React.createElement("th", {style:{padding:8}}, "Failure Point"),
+            React.createElement("th", {style:{padding:8}}, "Impact")
+          )),
+          React.createElement("tbody", null, data.TOP_MISSED.map((m, i) => React.createElement("tr", {key:i, style:{borderBottom:"1px solid var(--border)", background:i%2===0?"rgba(255,255,255,0.02)":"transparent"}},
+            React.createElement("td", {style:{padding:8}}, m.rank),
+            React.createElement("td", {style:{padding:8, color:"var(--accent)", fontWeight:600}}, m.group),
+            React.createElement("td", {style:{padding:8, color:"var(--text)"}}, m.failure),
+            React.createElement("td", {style:{padding:8, color:m.impact==="High"?"var(--red)":"var(--orange)"}}, m.impact)
+          )))
+        )
+      )
+    ),
+
+    subTab === "matrix" && React.createElement("div", {className:"block-card", style:{animation:"fadeSlideIn 0.3s ease both"}},
+      React.createElement("h3", {style:{fontSize:16, color:"var(--bright)", marginBottom:12}}, "Concept Comparison Matrix"),
+      React.createElement("div", {style:{display:"grid", gap:12}},
+        data.CONCEPT_MATRIX.map((c, i) => React.createElement("div", {key:i, style:{background:"var(--surface2)", padding:16, borderRadius:8, border:"1px solid var(--border)", transition:"transform 0.2s"}},
+          React.createElement("div", {style:{display:"flex", justifyContent:"space-between", marginBottom:8, alignItems:"center"}},
+            React.createElement("span", {style:{fontWeight:700, color:"var(--accent)"}}, c.a),
+            React.createElement("span", {style:{fontSize:10, color:"var(--dim)"}}, "vs"),
+            React.createElement("span", {style:{fontWeight:700, color:"var(--purple)"}}, c.b)
+          ),
+          React.createElement("div", {style:{fontSize:13, color:"var(--text)", marginBottom:6}}, React.createElement("strong", null, "Distinction: "), c.diff),
+          React.createElement("div", {style:{fontSize:12, color:"var(--dim)", fontStyle:"italic"}}, React.createElement("strong", {style:{color:"var(--green)"}}, "Tells: "), c.tell)
+        ))
+      )
+    ),
+
+    subTab === "resources" && React.createElement("div", {className:"block-card", style:{animation:"fadeSlideIn 0.3s ease both"}},
+      React.createElement("h3", {style:{fontSize:16, color:"var(--bright)", marginBottom:12}}, "Resource Tier List (2025-2026)"),
+      React.createElement("div", {style:{display:"grid", gap:12}},
+        data.RESOURCES.map((r, i) => React.createElement("div", {key:i, style:{background:"var(--surface2)", padding:16, borderRadius:8, display:"flex", justifyContent:"space-between", alignItems:"center", borderLeft:r.tier==="S"?"3px solid var(--yellow)":"3px solid var(--dim)"}},
+          React.createElement("div", null,
+            React.createElement("div", {style:{fontWeight:700, color:"var(--bright)"}}, r.name),
+            React.createElement("div", {style:{fontSize:12, color:"var(--dim)"}}, r.use)
+          ),
+          React.createElement("div", {style:{textAlign:"right"}},
+            React.createElement("div", {style:{fontSize:14, fontWeight:700, color:r.tier==="S"?"#facc15":"#94a3b8"}}, r.tier + " Tier"),
+            React.createElement("div", {style:{fontSize:11, color:"var(--dim)"}}, r.cost)
+          )
+        ))
+      )
+    ),
+
+    subTab === "blueprint" && React.createElement("div", {className:"block-card", style:{animation:"fadeSlideIn 0.3s ease both"}},
+      React.createElement("h3", {style:{fontSize:16, color:"var(--bright)", marginBottom:12}}, "Mnemonic Library"),
+      React.createElement("div", {style:{display:"grid", gap:12}},
+        data.MNEMONICS.map((m, i) => React.createElement("div", {key:i, style:{background:"var(--surface2)", padding:16, borderRadius:8, borderLeft:"3px solid var(--purple)"}},
+          React.createElement("div", {style:{fontSize:10, textTransform:"uppercase", color:"var(--dim)", marginBottom:4}}, m.cat),
+          React.createElement("div", {style:{fontWeight:700, color:"var(--bright)", marginBottom:4}}, m.m),
+          React.createElement("div", {style:{fontSize:12, color:"var(--text)"}}, m.comp)
+        ))
+      ),
+      React.createElement("div", {style:{marginTop:24, background:"rgba(94,162,247,0.1)", padding:16, borderRadius:8, border:"1px solid rgba(94,162,247,0.2)"}},
+        React.createElement("h4", {style:{color:"var(--accent)", fontSize:14, marginBottom:8}}, "Keyword Tells Strategy"),
+        data.KEYWORD_TELLS.map((k, i) => React.createElement("div", {key:i, style:{fontSize:12, marginBottom:6}},
+          React.createElement("strong", {style:{color:"var(--bright)"}}, "\"" + k.tell + "\": "),
+          React.createElement("span", {style:{color:"var(--text)"}}, k.meaning)
+        ))
+      )
+    )
+  );
+}
+
+
 /* ═══════════════════════════════════════════
    APP
    ═══════════════════════════════════════════ */
@@ -180,6 +278,7 @@ function App(){
   const [answeredCards,setAnsweredCards]=useState(()=>{try{return JSON.parse(localStorage.getItem("sp-cards-done")||"{}")}catch{return{}}});
   const [activeDay,setActiveDay]=useState(1);
   const [view,setView]=useState("map");
+  const [strategyTab, setStrategyTab] = useState("tactics");
   const [flashIdx,setFlashIdx]=useState(0);
   const [revealed,setRevealed]=useState(false);
   const [langOpen,setLangOpen]=useState(false);
@@ -505,7 +604,7 @@ function App(){
 
     // TABS
     React.createElement("div",{style:{display:"flex",borderBottom:"1px solid var(--border)",background:"var(--surface)"}},
-      ["map","ports","acronyms"].map(v=>
+      ["map","ports","acronyms", "strategy"].map(v=>
         React.createElement("button",{key:v,className:"tab-btn"+(view===v?" active":""),
           onClick:()=>{
             setView(v);
@@ -518,7 +617,7 @@ function App(){
             flex:1,padding:"10px 8px",border:"none",fontSize:12,fontWeight:600,cursor:"pointer",
             background:view===v?"var(--surface2)":"transparent",
             color:view===v?"var(--bright)":"var(--dim)",fontFamily:"var(--font-body)"}},
-          v==="map"?"📋 "+t.studyMap:v==="ports"?"🔌 "+t.ports:"📖 "+t.acronyms
+          v==="map"?"📋 "+t.studyMap:v==="ports"?"🔌 "+t.ports:v==="acronyms"?"📖 "+t.acronyms:"⚡ "+t.strategy
         )
       )
     ),
@@ -572,6 +671,9 @@ function App(){
         )
       )
     ),
+
+    // STRATEGY VIEW
+    view === "strategy" && React.createElement(StrategyView, {t, subTab: strategyTab, setSubTab: setStrategyTab}),
 
     // STUDY MAP VIEW
     view==="map" && React.createElement("div",null,
